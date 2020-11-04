@@ -5,15 +5,17 @@ from bd1 import select_user, insert_user_row, is_authenticated
 bot = TeleBot(BOT_TOKEN)
 headers={'dev': api_key}
 
+
 @bot.message_handler(content_types=['text'])
-def get_text(message, *args):
+def get_text(message):
     bot.send_message(message.chat.id, f'Здравствуйте {message.from_user.first_name} '
                                          f'{message.from_user.last_name}')
     msg = bot.send_message(message.chat.id, 'Пожалуйста укажите свой позывной и пароль через пробел')
     bot.register_next_step_handler(msg, name_password_step)
     # bot.register_next_step_handler(send, create_uis(message))
     # authenticate = requests.post('https://txcloud.atlassian.net/wiki/spaces/API/drivers/sign-in/',
-    #                              params={'login': name, 'password': password}, headers=headers) # information is required whether the user is registered as a driver
+    #                              params={'login': name, 'password': password}, headers=headers)
+    #                               information is required whether the user is registered as a driver
 
 
 @bot.message_handler(commands=["help"])
@@ -26,6 +28,7 @@ def name_password_step(message):
             create_user(message)
     except Exception as e:
         bot.reply_to(message, 'oooops')
+        get_text(message)
 
 
 @bot.message_handler(content_types=['text'])
@@ -46,7 +49,6 @@ def create_user(message):
                                           f'https://demo-kiev.ligataxi.com/accounts/login/')
 
 
-
 @bot.message_handler(content_types=['text'])
 def menu(message):
     markup_inline = types.InlineKeyboardMarkup()
@@ -55,12 +57,10 @@ def menu(message):
                                                       callback_data='history_balance')
     item_settings_commission = types.InlineKeyboardButton(text='Задать настройки комиссии',
                                                           callback_data='settings_commission')
-
     markup_inline.add(item_balance)
     markup_inline.add(item_history_balance)
     markup_inline.add(item_settings_commission)
     bot.send_message(message.chat.id, f'Добро пожаловать', reply_markup=markup_inline)
-
 
 
 @bot.callback_query_handler(func = lambda call: True)
@@ -88,9 +88,10 @@ def balance(call):
         #                    params={'driver_id': driver['driver_id'], 'limit': 10})
         # bot.send_message(call.message.chat.id, f'{req}')
     if call.data == 'settings_commission':
-        msg = bot.send_message(call.message.chat.id, f'Плжалуйста укажите минимальную и '
-                                                     f'максимальную сумму через пробел')
+        msg = bot.send_message(call.message.chat.id, f'Плжалуйста укажите минимальную, максимальную, процент комиссии и'
+                                                     f' фикс. комиссию, через пробел')
         bot.register_next_step_handler(msg, velues_commission_settings)
+
 
 @bot.message_handler(commands=["help"])
 def velues_commission_settings(message):
@@ -139,21 +140,14 @@ def velues_balance(message):
     except Exception as e:
         bot.reply_to(message, 'ooops')
 
-
-bot.polling(none_stop=True, interval=1)
-
-
-def set_settings_commission(message, munimum, maximum, percent):
+def set_settings_commission(message, munimum, maximum, percent, fixed_commission):
     '''
-        Параметры от и до передаются в запрос
+        Как будет возможность взаимодействовать с API JIRA, появитсься возможность передать все нужные параметры
+        такие как  munimum, maximum, percent, fixed_commission
     '''
     # driver = requests.post('https://txcloud.atlassian.net/wiki/spaces/API/drivers/sign-in/',
     #                        params={'login': name, 'password': password}, headers=headers)
     # driver.fin_operation.create(driver_id=driver['driver_id'], payment=payment)
     bot.send_message(message.chat.id, f'Настройки комиссии заданы')
-
-
-
-
 
 bot.polling(none_stop=True, interval=1)
