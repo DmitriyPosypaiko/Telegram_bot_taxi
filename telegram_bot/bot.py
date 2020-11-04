@@ -73,7 +73,7 @@ def balance(call):
     #                        params={'login': name, 'password': password}, headers=headers)
     if call.data == 'balance':
         # if driver:
-        msg = bot.send_message(call.message.chat.id, f'пожалуйста введите сумму платежа')
+        msg = bot.send_message(call.message.chat.id, f'Пожалуйста введите сумму платежа')
         bot.register_next_step_handler(msg, velues_balance)
 
     elif call.data == 'history_balance':
@@ -103,7 +103,7 @@ def velues_commission_settings(message):
         msg = bot.send_message(message.chat.id, f"minimum: {minimum}, maximum: {maximum}\n"
                                                 f"percent: {percent}, fixed_commission: {fixed_commission}")
         if msg:
-            set_settings_commission(message, minimum, maximum, percent)
+            set_settings_commission(message, minimum, maximum, percent, fixed_commission)
     except Exception as e:
         bot.reply_to(message, 'ooops')
 
@@ -134,7 +134,7 @@ def set_update_balance(message, payment):
 def velues_balance(message):
     try:
         payment = message.text.split()[0]
-        msg = bot.send_message(message.chat.id, f'payment: {payment}')
+        msg = bot.send_message(message.chat.id, f'payment: {int(payment)}')
         if msg:
             set_update_balance(message, payment)
     except Exception as e:
@@ -150,4 +150,4 @@ def set_settings_commission(message, munimum, maximum, percent, fixed_commission
     # driver.fin_operation.create(driver_id=driver['driver_id'], payment=payment)
     bot.send_message(message.chat.id, f'Настройки комиссии заданы')
 
-bot.polling(none_stop=True, interval=1)
+bot.polling(none_stop=True, interval=0)
